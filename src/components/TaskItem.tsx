@@ -11,10 +11,12 @@ function TaskItem({task, tasks, setTasks}) {
         return t
       })
     )
+    localStorage.setItem("tasks", JSON.stringify(tasks))
   }
 
   function handleDelete(id) {
     setTasks(tasks.filter(t => t.id !== id));
+    localStorage.setItem("tasks", JSON.stringify(tasks.filter(t => t.id !== id)))
   }
 
   return (
