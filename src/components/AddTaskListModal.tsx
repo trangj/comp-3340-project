@@ -1,18 +1,25 @@
 import { Modal, Stack, TextInput, Button, Flex, Title } from '@mantine/core'
 import { useDisclosure } from '@mantine/hooks';
 import React, { useState } from 'react'
+import { supabase } from '../supabase';
 
 function AddTaskListModal({taskLists, setTaskLists}) {
   const [opened, { open, close }] = useDisclosure(false);
   const [title, setTitle] = useState('');
 
-  function handleAddTask() {
+  async function handleAddTask() {
     const newTaskList = {
-      id: Date.now(),
       title,
+      user_id: (await supabase.auth.getUser()).data.user?.id
     }
-    setTaskLists([...taskLists, newTaskList]);
-    localStorage.setItem("taskLists", JSON.stringify([...taskLists, newTaskList]))
+    const { data, error } = await supabase
+      .from('task_list')
+      .insert([
+        newTaskList,
+      ])
+      .select('*')
+      .single();
+    setTaskLists([...taskLists, data]);
     close()
   }
 

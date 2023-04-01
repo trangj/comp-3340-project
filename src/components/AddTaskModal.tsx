@@ -1,34 +1,34 @@
 import { Modal, Stack, TextInput, Button, Flex, Title, Select } from '@mantine/core'
 import { useDisclosure } from '@mantine/hooks';
 import React, { useState } from 'react'
+import { supabase } from '../supabase';
 
 function AddTaskModal({tasks, setTasks, taskLists}) {
   const [opened, { open, close }] = useDisclosure(false);
   const [title, setTitle] = useState('');
   const [taskListId, setTaskListId] = useState('');
 
-  function handleAddTask() {
+  async function handleAddTask() {
     const newTask = {
-      id: Date.now(),
       title,
-      isComplete: false,
-      taskListId
+      task_list_id: taskListId
     }
-    setTasks([...tasks, newTask]);
-    localStorage.setItem("tasks", JSON.stringify([...tasks, newTask]))
+    const { data, error } = await supabase
+      .from('tasks')
+      .insert([
+        newTask,
+      ])
+      .select('*')
+      .single();
+    setTasks([...tasks, data]);
     close()
   }
 
   return (
     <>
-      <Flex justify={'space-between'} align='center'>
-        <Title order={3}>
-          Task List
-        </Title>
-        <Button my="md" onClick={() => open()}>
-          Add Task
-        </Button>
-      </Flex>
+      <Button my="md" onClick={() => open()}>
+        Add Task
+      </Button>
       <Modal opened={opened} onClose={close} title="Add Task" centered>
         <Stack>
           <TextInput
