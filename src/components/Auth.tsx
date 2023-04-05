@@ -1,4 +1,4 @@
-import { Button, Container, Divider, Stack, Tabs, TextInput, Title } from '@mantine/core'
+import { Button, Container, Stack, Tabs, TextInput, Title } from '@mantine/core'
 import React, { useState } from 'react'
 import { supabase } from '../supabase';
 

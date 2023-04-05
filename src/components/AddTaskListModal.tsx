@@ -1,9 +1,9 @@
-import { Modal, Stack, TextInput, Button, Flex, Title } from '@mantine/core'
+import { Modal, Stack, TextInput, Button } from '@mantine/core'
 import { useDisclosure } from '@mantine/hooks';
 import React, { useState } from 'react'
 import { supabase } from '../supabase';
 
-function AddTaskListModal({taskLists, setTaskLists}) {
+function AddTaskListModal({ taskLists, setTaskLists }) {
   const [opened, { open, close }] = useDisclosure(false);
   const [title, setTitle] = useState('');
 
@@ -22,6 +22,8 @@ function AddTaskListModal({taskLists, setTaskLists}) {
     setTaskLists([...taskLists, data]);
     close()
   }
+
+
 
   return (
     <>

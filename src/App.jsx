@@ -1,16 +1,19 @@
 import { useEffect, useState } from 'react'
-import { AppShell, Button, Container, Flex, Group, Navbar, NavLink, ScrollArea, Space, Stack, Title } from '@mantine/core'
+import { AppShell, Button, Container, Flex, Group, Navbar, NavLink, ScrollArea, Stack, Title } from '@mantine/core'
 import TaskItem from './components/TaskItem'
 import AddTaskModal from './components/AddTaskModal';
 import AddTaskListModal from './components/AddTaskListModal';
 import { supabase } from './supabase';
 import Auth from './components/Auth';
 
+
 function App() {
   const [tasks, setTasks] = useState([])
   const [taskLists, setTaskLists] = useState([])
   const [selectedTaskList, setSelectedTaskList] = useState(null)
   const [user, setUser] = useState(null);
+
+
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -56,16 +59,41 @@ function App() {
           .from('tasks')
           .select('*')
           .eq('task_list_id', taskListId);
+        tasks.sort((a, b) => new Date(a.due_date) - new Date(b.due_date));
         setTasks(tasks);
       } else {
         const { data: tasks, error } = await supabase
           .from('tasks')
           .select('*');
+        tasks.sort((a, b) => new Date(a.due_date) - new Date(b.due_date));
         setTasks(tasks);
       }
     } catch (err) {
       // handle error
     }
+  }
+  
+
+  async function deleteTaskList(taskListId) {
+    const shouldDelete = window.confirm('Are you sure you want to delete this task list? This action cannot be undone.');
+    if (!shouldDelete) {
+      return;
+    }
+    const { data, error } = await supabase
+      .from('task_list')
+      .delete()
+      .eq('id', taskListId)
+      .single();
+    setTaskLists(prevTaskLists => {
+      const index = prevTaskLists.findIndex(taskList => taskList.id === taskListId);
+      if (index >= 0) {
+        const updatedTaskLists = [...prevTaskLists];
+        updatedTaskLists.splice(index, 1);
+        return updatedTaskLists;
+      }
+      return prevTaskLists;
+    });
+    setSelectedTaskList(null);
   }
 
   return user ? (
@@ -82,22 +110,32 @@ function App() {
             <AddTaskListModal taskLists={taskLists} setTaskLists={setTaskLists} />
             <Stack mt="sm">
               <NavLink label="Show all tasks" onClick={() => {
-                  setSelectedTaskList(null)
-                }} 
+                setSelectedTaskList(null)
+              }}
               />
               {
                 taskLists.map(taskList => (
-                  <NavLink 
-                    label={taskList.title} 
-                    active={selectedTaskList && (selectedTaskList.id === taskList.id)} 
+                  <NavLink
+                    label={taskList.title}
+                    active={selectedTaskList && (selectedTaskList.id === taskList.id)}
                     onClick={() => {
                       setSelectedTaskList(taskList)
                       fetchTasks(taskList.id)
-                    }} 
+                    }}
                   />
                 ))
               }
             </Stack>
+            &nbsp;&nbsp;
+            {
+              selectedTaskList && (
+                <Button fullWidth onClick={() => {
+                  deleteTaskList(selectedTaskList.id)
+                }} style={{ backgroundColor: "darkred", color: "white" }}>
+                  Delete Selected Task List
+                </Button>
+              )
+            }
           </Navbar.Section>
         </Navbar>
       }
@@ -107,7 +145,7 @@ function App() {
           <Title order={3}>
             {(selectedTaskList && selectedTaskList.title) ?? "All tasks"}
           </Title>
-          <AddTaskModal tasks={tasks} setTasks={setTasks} taskLists={taskLists}/>
+          <AddTaskModal tasks={tasks} setTasks={setTasks} taskLists={taskLists} fetchTasks={fetchTasks} selectedTaskList={selectedTaskList} />
         </Flex>
         <Stack>
           {
@@ -118,8 +156,9 @@ function App() {
         </Stack>
       </Container>
     </AppShell>
+
   ) : (
-    <Auth/>
+    <Auth />
   )
 }
 
