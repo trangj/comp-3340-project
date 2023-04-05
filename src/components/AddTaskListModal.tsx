@@ -1,4 +1,4 @@
-import { Modal, Stack, TextInput, Button, Flex, Title, Space } from '@mantine/core'
+import { Modal, Stack, TextInput, Button } from '@mantine/core'
 import { useDisclosure } from '@mantine/hooks';
 import React, { useState } from 'react'
 import { supabase } from '../supabase';

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { AppShell, Button, Container, Flex, Group, Navbar, NavLink, ScrollArea, Space, Stack, Title } from '@mantine/core'
+import { AppShell, Button, Container, Flex, Group, Navbar, NavLink, ScrollArea, Stack, Title } from '@mantine/core'
 import TaskItem from './components/TaskItem'
 import AddTaskModal from './components/AddTaskModal';
 import AddTaskListModal from './components/AddTaskListModal';
@@ -12,6 +12,7 @@ function App() {
   const [taskLists, setTaskLists] = useState([])
   const [selectedTaskList, setSelectedTaskList] = useState(null)
   const [user, setUser] = useState(null);
+
 
 
   useEffect(() => {
@@ -58,17 +59,20 @@ function App() {
           .from('tasks')
           .select('*')
           .eq('task_list_id', taskListId);
+        tasks.sort((a, b) => new Date(a.due_date) - new Date(b.due_date));
         setTasks(tasks);
       } else {
         const { data: tasks, error } = await supabase
           .from('tasks')
           .select('*');
+        tasks.sort((a, b) => new Date(a.due_date) - new Date(b.due_date));
         setTasks(tasks);
       }
     } catch (err) {
       // handle error
     }
   }
+  
 
   async function deleteTaskList(taskListId) {
     const shouldDelete = window.confirm('Are you sure you want to delete this task list? This action cannot be undone.');
@@ -89,6 +93,7 @@ function App() {
       }
       return prevTaskLists;
     });
+    setSelectedTaskList(null);
   }
 
   return user ? (
@@ -149,9 +154,9 @@ function App() {
             ))
           }
         </Stack>
-      </Container>      
+      </Container>
     </AppShell>
-    
+
   ) : (
     <Auth />
   )
