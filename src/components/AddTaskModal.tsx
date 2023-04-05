@@ -14,7 +14,7 @@ function AddTaskModal({ tasks, setTasks, taskLists, fetchTasks, selectedTaskList
   today.setDate(today.getDate());
 
   useEffect(() => {
-    setTaskListId(taskLists[0]?.id || '');
+    setTaskListId(selectedTaskList?.id || '');
   }, [opened, taskLists]);
 
   async function handleAddTask() {
