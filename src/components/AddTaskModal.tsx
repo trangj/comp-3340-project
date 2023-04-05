@@ -18,6 +18,10 @@ function AddTaskModal({ tasks, setTasks, taskLists, fetchTasks, selectedTaskList
   }, [opened, taskLists]);
 
   async function handleAddTask() {
+    if(title.length < 1){
+      alert('Please enter a task name.');
+      return;
+    }
     if (!dueDate) {
       alert('Please select a due date.');
       return;
